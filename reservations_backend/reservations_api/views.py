@@ -1,46 +1,80 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import Reservation
-from .serializers import ReservationSerializer
+from django.http import HttpResponse
+from django.conf import settings
+from rest_framework import viewsets, permissions, generics
+# from rest_framework.response import Response
+# from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+# from rest_framework_simplejwt.tokens import RefreshToken
 
-class ReservationList(APIView):
-    def get(self, request):
-        reservations = Reservation.objects.all()
-        serializer = ReservationSerializer(reservations, many=True)
-        return Response(serializer.data)
+from django.contrib.auth.models import User
 
-    def post(self, request):
-        serializer = ReservationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from reservations_core.models import (
+    Address,
+    Customer,
+    Facility,
+    Reservation,
+)
+from .serializers import (
+    AddressSerializer,
+    CustomerSerializer,
+    FacilitySerializer,
+    ReservationSerializer,
+    UserSerializer,
+)
 
-class ReservationDetail(APIView):
-    def get(self, request, pk):
-        try:
-            reservation = Reservation.objects.get(pk=pk)
-            serializer = ReservationSerializer(reservation)
-            return Response(serializer.data)
-        except Reservation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request, pk):
-        try:
-            reservation = Reservation.objects.get(pk=pk)
-            serializer = ReservationSerializer(reservation, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Reservation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+# class CookieTokenObtainPairView(TokenObtainPairView):
+#     def post(self, request, *args, **kwargs):
+#         response = super().post(request, *args, **kwargs)
+#         data = response.data
+#         refresh = response.data.get("refresh")
+#         access = response.data.get("access")
 
-    def delete(self, request, pk):
-        try:
-            reservation = Reservation.objects.get(pk=pk)
-            reservation.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Reservation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+#         response.set_cookie(
+#             "refresh_token",
+#             refresh,
+#             httponly=True,
+#             secure=settings.DEBUG is False,
+#             samesite="Lax",
+#         )
+
+#         respon
+
+#         return response
+
+
+class TestView(generics.GenericAPIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        print(request.META["HTTP_ORIGIN"])
+        return HttpResponse(content="XDDDDDDDD", status=200)
+
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class AddressViewSet(viewsets.ModelViewSet):
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializer
+
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+
+class FacilityViewSet(viewsets.ModelViewSet):
+    queryset = Facility.objects.all()
+    serializer_class = FacilitySerializer
+
+
+class ReservationViewSet(viewsets.ModelViewSet):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer

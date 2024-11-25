@@ -6,7 +6,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
-from rest_framework import routers
+from rest_framework import routers, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from . import views
 
@@ -17,6 +18,7 @@ router.register(r"facilities", views.FacilityViewSet)
 router.register(r"reservations", views.ReservationViewSet)
 
 urlpatterns = [
+    # schema endpoints
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "schema/swagger-ui/",
@@ -28,8 +30,21 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    # JWT Token authentication endpoints
+    path(
+        "token/",
+        TokenObtainPairView.as_view(permission_classes=[permissions.AllowAny]),
+        name="token_obtain_pair",
+    ),
+    path(
+        "token/refresh/",
+        TokenRefreshView.as_view(permission_classes=[permissions.AllowAny]),
+        name="token_refresh",
+    ),
+    # other API endpoints
     path("users/", views.UserList.as_view()),
     path("users/<int:pk>/", views.UserDetail.as_view()),
+    path("test/", views.TestView.as_view()),
 ]
 
 urlpatterns += router.urls

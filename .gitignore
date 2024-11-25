@@ -91,3 +91,5 @@ logs/
 *.egg
 *.egg-info/
 .installed.cfg
+
+.ruff_cache
